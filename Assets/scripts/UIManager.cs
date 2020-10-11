@@ -6,12 +6,6 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     /// <summary>
-    /// El componente encargado de manejar el nivel.
-    /// </summary>
-    [Tooltip("El componente encargado de manejar el nivel.")]
-    public LevelManager LvlManag;
-
-    /// <summary>
     /// El estado actual de la interfaz. True si está activada,
     /// False en caso contrario.
     /// </summary>
@@ -93,6 +87,6 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void OnClickGo()
     {
-        LvlManag.MostrarTablero();
+        LevelManager.Instance.MostrarTablero();
     }
 }

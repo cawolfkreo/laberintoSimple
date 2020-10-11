@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : Singleton<LevelManager>
 {
     /// <summary>
     /// El tiempo en segundos en el que se dejará de mostrar el tablero.
