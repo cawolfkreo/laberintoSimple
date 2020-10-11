@@ -81,24 +81,45 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if(Time.time < tiempoFinal)
+        OrdenTransicionesUI();
+    }
+
+    /// <summary>
+    /// Ejecuta los cambios en orden que va a tener la escena. Esto se 
+    /// refiere a que se encarga de las transiciones de la interfáz
+    /// </summary>
+    private void OrdenTransicionesUI()
+    {
+        // Entre el inicio y final de la transición, se ajusta la transparencia de la imagen
+        if (Time.time < tiempoFinal && Time.time >= tiempoInicial)
         {
-            if(Time.time >= tiempoInicial)
+            float transpareActual = UIManag.AlphaActual;
+
+            float diferenciaTransp = Mathf.Abs(transpareActual - _AlphaObjetivo);
+
+            if (diferenciaTransp > 0.00001f)
             {
-                float transpareActual = UIManag.AlphaActual;
-
-                float diferenciaTransp = Mathf.Abs(transpareActual - _AlphaObjetivo);
-
-                if(diferenciaTransp > 0.00001f)
-                {
-                    transpareActual = Mathf.Lerp(transpareActual, _AlphaObjetivo, veloOpacidad);
-                    UIManag.AlphaActual = transpareActual;
-                }
+                transpareActual = Mathf.Lerp(transpareActual, _AlphaObjetivo, veloOpacidad);
+                UIManag.AlphaActual = transpareActual;
             }
         }
-        else
+        // Cuando se oculta el tablero, se activa la interfaz y se ajusta la transparencia final de la imagen
+        else if(Time.time > tiempoFinal)
         {
             UIManag.AlphaActual = _AlphaObjetivo;
+            if(!UIManag.IsUIActive)
+            {
+                UIManag.IsUIActive = true;
+            }
         }
+    }
+
+    /// <summary>
+    /// Se encarga de hacer los cambios necesarios para mostrar
+    /// una vez más el tablero del juego
+    /// </summary>
+    public void MostrarTablero()
+    {
+
     }
 }

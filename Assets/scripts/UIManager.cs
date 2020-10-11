@@ -6,6 +6,25 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     /// <summary>
+    /// El componente encargado de manejar el nivel.
+    /// </summary>
+    [Tooltip("El componente encargado de manejar el nivel.")]
+    public LevelManager LvlManag;
+
+    /// <summary>
+    /// El estado actual de la interfaz. True si está activada,
+    /// False en caso contrario.
+    /// </summary>
+    public bool IsUIActive
+    {
+        get => Panel.activeSelf;
+        set
+        {
+            Panel.SetActive(value);
+        }
+    }
+
+    /// <summary>
     /// El nivel de transparencia original de la imagen.
     /// </summary>
     public float AlphaOriginal { get; private set; }
@@ -14,6 +33,11 @@ public class UIManager : MonoBehaviour
     /// Esta es la imagen que se utilizará para cubrir al escenario en el juego.
     /// </summary>
     private Image ImgCubreEscenario;
+
+    /// <summary>
+    /// El panel donde la interfaz para entregar los comandos va a ocurrir.
+    /// </summary>
+    private GameObject Panel;
 
     /// <summary>
     /// El nivel de transparencia actual de la imagen.
@@ -33,11 +57,22 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// Se obtienen las referencias de la interfáz cuando este componente inicia.
     /// </summary>
-    private void Awake()
+    void Awake()
     {
         Canvas canvas = GetComponentInChildren<Canvas>();
         ImgCubreEscenario = canvas.GetComponentInChildren<Image>();
         AlphaOriginal = ImgCubreEscenario.color.a;
+
+        Panel = GameObject.FindWithTag("panel");
+    }
+
+    /// <summary>
+    /// Se hacen los ajustes necesarios en los componentes de la interfáz antes de
+    /// que el juego comience.
+    /// </summary>
+    void Start()
+    {
+        Panel.SetActive(false);
     }
 
     /// <summary>
@@ -50,5 +85,14 @@ public class UIManager : MonoBehaviour
         Color colorImg = ImgCubreEscenario.color;
         colorImg.a = nuevoAlpha;
         ImgCubreEscenario.color = colorImg;
+    }
+
+    /// <summary>
+    /// Es llamado al momento en que se hace click en el botón
+    /// de "go" en la interfaz.
+    /// </summary>
+    public void OnClickGo()
+    {
+        LvlManag.MostrarTablero();
     }
 }
