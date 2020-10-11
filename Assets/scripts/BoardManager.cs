@@ -77,7 +77,7 @@ public class BoardManager : MonoBehaviour
     /// Cuando el componente despierta, toma las
     /// referencias necesarias para su funcionamiento.
     /// </summary>
-    public void Awake()
+    void Awake()
     {
         _PosTablero = GetComponent<Transform>();
 
@@ -96,7 +96,7 @@ public class BoardManager : MonoBehaviour
     /// <summary>
     /// Cuando el juego comienza, se crea el tablero y se instancia
     /// </summary>
-    public void Start()
+    void Start()
     {
         CentrarTablero();
         AgregarObjetosAlTablero();
