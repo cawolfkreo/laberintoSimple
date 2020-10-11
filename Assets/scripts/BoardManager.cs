@@ -74,12 +74,20 @@ public class BoardManager : MonoBehaviour
     private GameObject[,] _Tablero;
 
     /// <summary>
+    /// Vector 2d utilizado para representar la posición
+    /// del jugador en el tablero.
+    /// </summary>
+    private Vector2Int posJugador;
+
+    /// <summary>
     /// Cuando el componente despierta, toma las
     /// referencias necesarias para su funcionamiento.
     /// </summary>
     void Awake()
     {
         _PosTablero = GetComponent<Transform>();
+
+        posJugador = new Vector2Int();
 
         // Se crea el tablero con los prefabs escogidos.
         // Esto es hecho para temas de demostración pero
@@ -151,14 +159,15 @@ public class BoardManager : MonoBehaviour
                     // Para que este objeto se encuentre sobre el suelo, se le agrega 1f a su "altura"
                     // del eje Z.
                     NuevaInstancia.transform.localPosition -= new Vector3(0, 0, 1f);
+
+                    // al momento de agregar al jugador en el 
+                    if(objetoAInstanciar == Jugador)
+                    {
+                        posJugador.x = x;
+                        posJugador.y = y;
+                    }
                 }
             }
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

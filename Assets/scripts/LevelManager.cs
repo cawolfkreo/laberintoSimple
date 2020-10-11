@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Este script se encarga de manejar las secuencia del nivel,
+/// los estados y eventos de ganar o perder.
+/// </summary>
 public class LevelManager : Singleton<LevelManager>
 {
     /// <summary>
