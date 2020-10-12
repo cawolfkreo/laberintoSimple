@@ -159,8 +159,8 @@ public class UIManager : MonoBehaviour
         int totalflechas = _Flechas.Count;
 
         // Se crea la flecha a partir de un objeto vacio
-        GameObject vacio = new GameObject("Flecha" + totalflechas);
-        GameObject Flecha = Instantiate(vacio, _Panel.transform);
+        GameObject Flecha = new GameObject("Flecha" + totalflechas);
+        Flecha.transform.parent = _Panel.transform;
 
         // Se agrega al objeto vacio la imagen de la flecha
         RectTransform transfor = Flecha.AddComponent<RectTransform>();

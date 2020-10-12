@@ -114,34 +114,51 @@ public class LevelManager : Singleton<LevelManager>
     /// </summary>
     private void OrdenTransicionesUI()
     {
+        float tiempoActual = Time.time;
         // Entre el inicio y final de la transición, se ajusta la transparencia de la imagen
-        if (Time.time < _tiempoFinal && Time.time >= _tiempoInicial)
+        if (tiempoActual < _tiempoFinal && tiempoActual >= _tiempoInicial)
         {
-            float transpareActual = UIManag.AlphaActual;
-
-            float diferenciaTransp = Mathf.Abs(transpareActual - _AlphaObjetivo);
-
-            if (diferenciaTransp > 0.00001f)
-            {
-                transpareActual = Mathf.Lerp(transpareActual, _AlphaObjetivo, _veloOpacidad);
-                UIManag.AlphaActual = transpareActual;
-            }
+            AjustarAlpha();
         }
-        // Cuando se oculta el tablero, se activa la interfaz y se ajusta la transparencia final de la imagen
-        else if(Time.time > _tiempoFinal && !_EstaReproduciendo)
+        else if(tiempoActual > _tiempoFinal)
         {
             UIManag.AlphaActual = _AlphaObjetivo;
-            if(!UIManag.IsUIActive)
+            // Cuando se oculta el tablero, se activa la interfaz y se ajusta la transparencia final de la imagen
+            if (!_EstaReproduciendo)
             {
-                UIManag.IsUIActive = true;
+                if (!UIManag.IsUIActive)
+                {
+                    UIManag.IsUIActive = true;
 
-                _AceptarComandos = true;
+                    _AceptarComandos = true;
+                }
+            }
+            else
+            {
+                // Cuando se muestra otra vez el tablero, se deben ejecutar los comandos del personaje.
+                Tablero.Character.RealizarComandos();
             }
         }
-        else if (_EstaReproduciendo)
+        
+    }
+
+    /// <summary>
+    /// Ajusta el nivel de transparencia de la imagen
+    /// en el frame actual del juego. Este metodo solo
+    /// debe ser llamado cuando el juego se encuentra
+    /// realizando una transicion como mostrar el
+    /// tablero o dejar de mostrar el tablero.
+    /// </summary>
+    private void AjustarAlpha()
+    {
+        float transpareActual = UIManag.AlphaActual;
+
+        float diferenciaTransp = Mathf.Abs(transpareActual - _AlphaObjetivo);
+
+        if (diferenciaTransp > 0.00001f)
         {
-            UIManag.AlphaActual = 0f;
-            Tablero.Character.RealizarComandos();
+            transpareActual = Mathf.Lerp(transpareActual, _AlphaObjetivo, _veloOpacidad);
+            UIManag.AlphaActual = transpareActual;
         }
     }
 

@@ -53,13 +53,16 @@ public class BoardManager : MonoBehaviour
     public GameObject Jugador;
 
     /// <summary>
-    /// retorna el componente character del objeto jugador
-    /// que se encuentra en el tablero.
+    /// El script que se encarga de manejar
+    /// al jugador y su movimiento.
     /// </summary>
-    public Character Character
-    {
-        get => _character;
-    }
+    public Character Character { get; private set; }
+
+    /// <summary>
+    /// Vector 2d utilizado para representar la posición
+    /// del jugador en el tablero.
+    /// </summary>
+    public Vector2Int PosJugador { get; private set; }
 
     /// <summary>
     /// La cantidad de filas que tiene el tablero.
@@ -83,16 +86,10 @@ public class BoardManager : MonoBehaviour
     private GameObject[,] _Tablero;
 
     /// <summary>
-    /// Vector 2d utilizado para representar la posición
-    /// del jugador en el tablero.
+    /// Referencia para guardar la casilla que está
+    /// debajo del jugador en el tablero.
     /// </summary>
-    private Vector2Int _posJugador;
-
-    /// <summary>
-    /// El script que se encarga de manejar
-    /// al jugador y su movimiento.
-    /// </summary>
-    private Character _character;
+    private GameObject _CasillaBajoJugador;
 
     /// <summary>
     /// Cuando el componente despierta, toma las
@@ -102,7 +99,7 @@ public class BoardManager : MonoBehaviour
     {
         _PosTablero = GetComponent<Transform>();
 
-        _posJugador = new Vector2Int();
+        PosJugador = new Vector2Int();
 
         // Se crea el tablero con los prefabs escogidos.
         // Esto es hecho para temas de demostración pero
@@ -160,7 +157,7 @@ public class BoardManager : MonoBehaviour
                 // Se crea el suelo respectivo a la posición actual del tablero
                 GameObject nuevoSuelo = Instantiate(Suelo, new Vector3(0, 0, 0), Quaternion.identity);
                 nuevoSuelo.transform.parent = _PosTablero;
-                nuevoSuelo.transform.localPosition = new Vector3(x * espacioEntreCuadros, -y * espacioEntreCuadros, 0f);
+                nuevoSuelo.transform.localPosition = PosTableroALocalPos(new Vector2Int(x, y), 0f);
 
                 // Se crea el objeto que debe ir sobre el suelo en esta posición.
                 GameObject objetoAInstanciar = _Tablero[y, x];
@@ -173,21 +170,110 @@ public class BoardManager : MonoBehaviour
 
                     // Para que este objeto se encuentre sobre el suelo, se le agrega 1f a su "altura"
                     // del eje Z.
-                    NuevaInstancia.transform.localPosition -= new Vector3(0, 0, 1f);
+                    float alturaObjeto = 1f;
 
                     // al momento de agregar al jugador en el tablero, se almacena su
                     // posición en el tablero y se le entrega la referencia a este
                     // componente del tablero.
                     if (objetoAInstanciar == Jugador)
                     {
-                        _posJugador.x = x;
-                        _posJugador.y = y;
+                        PosJugador = new Vector2Int(x, y);
 
-                        _character = NuevaInstancia.GetComponent<Character>();
-                        _character.BoardManager = this;
+                        Character = NuevaInstancia.GetComponent<Character>();
+                        Character.BoardManag = this;
+
+                        // Como la casilla bajo el jugador siempre es el piso al
+                        // iniciar la partida, se almacena null en esta variable.
+                        _CasillaBajoJugador = null;
+
+                        // Si el objeto es el jugador, la altura a agregarle debe
+                        // ser mayor para que este se posicione sobre los demás
+                        // objetos en el tablero al moverse sobre este.
+                        alturaObjeto = 2f;
                     }
+                    
+                    // Se ajusta la altura del objeto de acuerdo a la altura calculada en "alturaObjeto".
+                    NuevaInstancia.transform.localPosition -= new Vector3(0, 0, alturaObjeto);
+
+                    // Se actualiza el tablero para que incluya la nueva instancia creada.
+                    _Tablero[y, x] = NuevaInstancia;
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Mueve el jugador hacia la direccion que se entrega por parámetro.
+    /// La dirección que se espera es el "cambio" o la diferencia que hay
+    /// hacía la posición donde se espera al jugador
+    /// </summary>
+    /// <param name="movimiento">Vector que indica cuantas filas y 
+    /// columnas debe moverse el personaje en el tablero.</param>
+    /// <returns>True si el movimiento fue válido, false en caso
+    /// de que algo ocurriera.</returns>
+    public bool MoverPersonaje(Vector2Int movimiento)
+    {
+        Vector2Int nuevaPos = PosJugador + movimiento;
+
+        // Si la nueva posicion está por fuera del tablero
+        if(PosicionAFueraDelTablero(nuevaPos))
+        {
+            // Se retorna falso inmediatamente y no se efectua ningun cambio.
+            return false;
+        }
+
+        GameObject ObjetoAMoverse = _Tablero[nuevaPos.y, nuevaPos.x];
+        GameObject PersojJugador = _Tablero[PosJugador.y, PosJugador.x];
+
+        // Se mueve el objeto del jugador en el tablero y se actualizan las
+        // casillas y posiciones.
+        PersojJugador.transform.localPosition = PosTableroALocalPos(nuevaPos, -2f);
+        _Tablero[nuevaPos.y, nuevaPos.x] = PersojJugador;
+        _Tablero[PosJugador.y, PosJugador.x] = _CasillaBajoJugador;
+        PosJugador = nuevaPos;
+
+        // Se actualiza la casilla sobre la que se va a mover el personaje
+        _CasillaBajoJugador = ObjetoAMoverse;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Convierte la posicion de la matriz que representa el tablero
+    /// a una posicion relativa de unity, esta posicion se utiliza con
+    /// "localposition" en los "GameObjects" que son hijos del GameObject
+    /// del tablero.
+    /// </summary>
+    /// <param name="posicion">Las coordenadas dentro de la matriz</param>
+    /// <returns>un Vector2 con la posicion local de Unity.</returns>
+    private Vector3 PosTableroALocalPos(Vector2Int posicion, float posZ)
+    {
+        return new Vector3(posicion.x * espacioEntreCuadros, -posicion.y * espacioEntreCuadros, posZ);
+    }
+
+    /// <summary>
+    /// Revisa si la posición que se entrega por parámetro se encuentra a
+    /// fuera del tablero de juego
+    /// </summary>
+    /// <param name="posicion">La posición que se requiere ver si está afuera
+    /// del tablero</param>
+    /// <returns>True si se encuentra por fuera del tablero, False en caso 
+    /// contrario</returns>
+    private bool PosicionAFueraDelTablero(Vector2Int posicion)
+    {
+        bool afueraSuperior = posicion.x >= _NumCols || posicion.y >= _NumFilas;
+        bool afueraInferior = posicion.x < 0 || posicion.y < 0;
+        return afueraSuperior || afueraInferior;
+    }
+
+    /// <summary>
+    /// Revisa si hay o no una pared en la posicion entregada por parámetro
+    /// </summary>
+    /// <param name="posicion">un vector2 de enteros con la coordenada en X y Y del
+    /// tablero donde se quiere conocer si hay o no una pared</param>
+    /// <returns>True en caso de que si lo este, Falso en caso contrario</returns>
+    public bool HayParedEnLaPos(Vector2Int posicion)
+    {
+        return posicion.x == 0;
     }
 }

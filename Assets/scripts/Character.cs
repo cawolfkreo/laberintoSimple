@@ -8,7 +8,7 @@ public class Character : MonoBehaviour
     /// El tablero de juego donde se encuentra
     /// este personaje.
     /// </summary>
-    public BoardManager BoardManager;
+    public BoardManager BoardManag;
 
     /// <summary>
     /// El tiempo, en segundos, que el personaje espera
@@ -44,23 +44,26 @@ public class Character : MonoBehaviour
     /// mover el personaje.</param>
     public void MoverseHacia(Direccion direction)
     {
+        Vector2Int deltaPos = Vector2Int.zero;
         switch(direction)
         {
             case Direccion.arriba:
-                Debug.Log("Me moví arriba!!");
+                deltaPos.y = -1;
                 break;
             case Direccion.abajo:
-                Debug.Log("Me moví Abajo!!");
+                deltaPos.y = 1;
                 break;
             case Direccion.derecha:
-                Debug.Log("Me moví a la derecha!!");
+                deltaPos.x = 1;
                 break;
             case Direccion.izquierda:
-                Debug.Log("Me moví a la izquierda!!");
+                deltaPos.x = -1;
                 break;
             default:
                 break;
         }
+
+        _ = BoardManag.MoverPersonaje(deltaPos);
     }
 
     /// <summary>
@@ -93,7 +96,7 @@ public class Character : MonoBehaviour
             comandoAEjecutar.Execute(this);
 
             // Se remueve el comando solo cuando este ya fue ejecutado
-            _ComandosAEjecutar.Dequeue();
+            _ = _ComandosAEjecutar.Dequeue();
 
             _TiempoProximoCom = tiempoAct + TiempoEntreMovimientos;
         }
