@@ -8,12 +8,6 @@ using System.Collections.Generic;
 public class LeftCommand : MovementCommand
 {
     /// <summary>
-    /// La direccion hacia la que se moverá el comando
-    /// el cual es hacia la izquierda.
-    /// </summary>
-    private const Direccion _direc = Direccion.izquierda;
-
-    /// <summary>
     /// Ejecuta el comando respectivo en el jugador que
     /// se entrega por parámetro.
     /// </summary>
@@ -21,6 +15,9 @@ public class LeftCommand : MovementCommand
     /// que tiene el personaje del jugador</param>
     public override void Execute(Character character)
     {
-        character.MoverseHacia(_direc);
+        //La direccion hacia la que se moverá el comando
+        // el cual es hacia la izquierda.
+        Direccion direc = Direccion.izquierda;
+        character.MoverseHacia(direc);
     }
 }

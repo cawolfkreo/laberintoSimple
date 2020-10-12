@@ -28,12 +28,24 @@ public class Character : MonoBehaviour
     private float _TiempoProximoCom = 0f;
 
     /// <summary>
+    /// Bandera que almacena si el juego finalizó o no.
+    /// </summary>
+    private bool _FinalizoElJuego;
+
+    /// <summary>
     /// Cuando el personaje se despierta obtiene las referencias
     /// necesarias para su funcionamiento.
     /// </summary>
     private void Awake()
     {
         _ComandosAEjecutar = new Queue<MovementCommand>();
+
+        // Se suscribe el metodo para manejar el estado de perder
+        // o ganar al personaje
+        LevelManager.Instance.OnWin += HandleWinOrLose;
+        LevelManager.Instance.OnLose += HandleWinOrLose;
+
+        _FinalizoElJuego = false;
     }
 
     /// <summary>
@@ -63,7 +75,21 @@ public class Character : MonoBehaviour
                 break;
         }
 
-        _ = BoardManag.MoverPersonaje(deltaPos);
+        // Se trata de realizar el movimiento y se revisa si el jugador
+        // se sale del tablero si ejecuta este movimiento.
+        bool sePudoMover = BoardManag.MoverPersonaje(deltaPos);
+        bool haChocado = BoardManag.JugadorChocoPared();
+        if (!sePudoMover || haChocado)
+        {
+            // Si el jugador salio del tablero, se procede a decir que este perdió
+            LevelManager.Instance.TriggerLose();
+        }
+
+        bool haGanado = BoardManag.JugadorenMeta();
+        if (haGanado)
+        {
+            LevelManager.Instance.TriggerWin();
+        }
     }
 
     /// <summary>
@@ -89,7 +115,7 @@ public class Character : MonoBehaviour
         // para calculos futuros
         float tiempoAct = Time.time;
 
-        if (_TiempoProximoCom <= tiempoAct && _ComandosAEjecutar.Count > 0)
+        if (!_FinalizoElJuego &&_TiempoProximoCom <= tiempoAct && _ComandosAEjecutar.Count > 0)
         {
             MovementCommand comandoAEjecutar = _ComandosAEjecutar.Peek();
 
@@ -100,5 +126,14 @@ public class Character : MonoBehaviour
 
             _TiempoProximoCom = tiempoAct + TiempoEntreMovimientos;
         }
+    }
+
+    /// <summary>
+    /// Método que modifica el comportamiento del personaje cuando
+    /// el juego entra en el estado de ganar o de perder.
+    /// </summary>
+    private void HandleWinOrLose()
+    {
+        _FinalizoElJuego = false;
     }
 }

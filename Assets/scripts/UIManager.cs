@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -64,6 +65,11 @@ public class UIManager : MonoBehaviour
     private GameObject _Panel;
 
     /// <summary>
+    /// El texto que se va a encargar de mostrar el mensaje final para el jugador.
+    /// </summary>
+    private GameObject _Mensaje;
+
+    /// <summary>
     /// El objeto encargado de almacenar las flechas que se irán mostrando en la
     /// interfáz de usuario.
     /// </summary>
@@ -84,12 +90,17 @@ public class UIManager : MonoBehaviour
         AlphaOriginal = _ImgCubreEscenario.color.a;
 
         _Panel = GameObject.FindWithTag("panel");
+        _Mensaje = GameObject.FindWithTag("texto");
 
         _Flechas = new List<GameObject>();
 
         // Se carga el recurso de la flecha para evitar cargarlo constantemente
         // más adelante.
         _ImgFlecha = Resources.Load<Texture2D>("Images/flecha-izq");
+
+        // Se suscribe la interfaz a los eventos de ganar y perder
+        LevelManager.Instance.OnWin += HandleWin;
+        LevelManager.Instance.OnLose += HandleLose;
     }
 
     /// <summary>
@@ -99,6 +110,7 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         _Panel.SetActive(false);
+        _Mensaje.SetActive(false);
     }
 
     /// <summary>
@@ -120,6 +132,37 @@ public class UIManager : MonoBehaviour
     public void OnClickGo()
     {
         LevelManager.Instance.MostrarTablero();
+    }
+
+    /// <summary>
+    /// Método que se llama cuando el jugador gana el juego.
+    /// Este método muestra el mensaje de victoria en el juego
+    /// </summary>
+    private void HandleWin()
+    {
+        MostrarMensajeFinal("¡Haz ganado!");
+    }
+
+    /// <summary>
+    /// Método que se llama cuando el jugador pierde el juego.
+    /// Este método muestra el mensaje de victoria en el juego
+    /// </summary>
+    private void HandleLose()
+    {
+        MostrarMensajeFinal("¡Haz perdido!");
+    }
+
+    /// <summary>
+    /// Activa el objeto del mensaje y modifica el texto de este
+    /// para que muestre el mensaje que se recibe por parámetro.
+    /// </summary>
+    /// <param name="mensajeAMostrar">El mensaje que se desea
+    /// mostrar en el objeto de mensaje</param>
+    private void MostrarMensajeFinal(string mensajeAMostrar)
+    {
+        _Mensaje.SetActive(true);
+        TextMeshProUGUI txtMesh = _Mensaje.GetComponent<TextMeshProUGUI>();
+        txtMesh.text = mensajeAMostrar;
     }
 
     /// <summary>

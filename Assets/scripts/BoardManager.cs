@@ -40,10 +40,10 @@ public class BoardManager : MonoBehaviour
 
     /// <summary>
     /// El prefab que contiene el sprite
-    /// del objeto que remueve comandos.
+    /// del objeto que deshace los comandos.
     /// </summary>
-    [Tooltip("Este es el prefab que contiene objeto que remueve los comandos del jugador")]
-    public GameObject remover;
+    [Tooltip("Este es el prefab que contiene objeto que deshace los comandos del jugador")]
+    public GameObject Revertir;
 
     /// <summary>
     /// El prefab que contiene el sprite
@@ -108,7 +108,7 @@ public class BoardManager : MonoBehaviour
         // que permitan un mejor control nivel por nivel.
         _Tablero = new GameObject[_NumFilas, _NumCols] {
             { Pared, Pared, Pared},
-            { Meta, null, Pared },
+            { Meta, Revertir, Pared },
             { Pared, Jugador, Pared},
         };
     }
@@ -275,5 +275,45 @@ public class BoardManager : MonoBehaviour
     public bool HayParedEnLaPos(Vector2Int posicion)
     {
         return posicion.x == 0;
+    }
+
+    /// <summary>
+    /// Este método revisa si un GameObject instanciado es o no
+    /// una instancia de un prefab comparando sus nombres.
+    /// </summary>
+    /// <param name="instancia">El GameObject ya instanciado</param>
+    /// <param name="prefab">El prefab que se sospecha fue clonado</param>
+    /// <returns>True si instancia es una instancia del prefab, false en
+    /// el caso contrario</returns>
+    private bool EsClonDelPrefab(GameObject instancia, GameObject prefab)
+    {
+        if(instancia == null)
+        {
+            return false;
+        }
+
+        return instancia.name == string.Format("{0}(Clone)", prefab.name);
+    }
+
+    /// <summary>
+    /// Revisa si el jugador se encuentra o no sobre la meta
+    /// </summary>
+    /// <returns>True si el jugador esta sobre la meta, false
+    /// en caso contrario</returns>
+    public bool JugadorenMeta()
+    {
+        return EsClonDelPrefab(_CasillaBajoJugador, Meta);
+    }
+
+    /// <summary>
+    /// Revisa si el jugador ha chocado o no contra una pared.
+    /// Esto lo hace revisando si el jugador se encuentra sobre
+    /// una pared o no.
+    /// </summary>
+    /// <returns>True su el jugador está sobre una pared. False
+    /// en caso contrario</returns>
+    public bool JugadorChocoPared()
+    {
+        return EsClonDelPrefab(_CasillaBajoJugador, Pared);
     }
 }

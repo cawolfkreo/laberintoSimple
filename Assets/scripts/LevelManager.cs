@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,16 @@ using UnityEngine;
 /// </summary>
 public class LevelManager : Singleton<LevelManager>
 {
+    /// <summary>
+    /// El evento de ganar al cual se suscriben los demás objetos en el juego.
+    /// </summary>
+    public event Action OnWin;
+
+    /// <summary>
+    /// El evento de perder al cual se suscriben los demás objetos en el juego.
+    /// </summary>
+    public event Action OnLose;
+
     /// <summary>
     /// El tiempo en segundos en el que se dejará de mostrar el tablero.
     /// </summary>
@@ -21,9 +32,6 @@ public class LevelManager : Singleton<LevelManager>
     /// </summary>
     [Tooltip("Momento en el cual debe empezar la transición para ocultar el tablero. Como debe ocurrir antes de que se oculte el tablero, debe ser menor a Tiempo Mostrar Tablero")]
     public float TiempoInicTransi = 9f;
-
-    //public event Action OnWin;
-    //public event Action OnLose;
 
     /// <summary>
     /// El componente encargado de controlar la interfáz.
@@ -237,5 +245,23 @@ public class LevelManager : Singleton<LevelManager>
 
         // Se oculta la interfaz
         UIManag.IsUIActive = false;
+    }
+
+    /// <summary>
+    /// Método creado para iniciar el broadcast del evento de perdida
+    /// para los componentes del juego que se encuentran suscritos.
+    /// </summary>
+    public void TriggerWin()
+    {
+        OnWin?.Invoke();
+    }
+
+    /// <summary>
+    /// Método creado para iniciar el broadcast del evento de perdida
+    /// para los componentes del juego que se encuentran suscritos.
+    /// </summary>
+    public void TriggerLose()
+    {
+        OnLose?.Invoke();
     }
 }

@@ -8,12 +8,6 @@ using System.Collections.Generic;
 public class UpCommand : MovementCommand
 {
     /// <summary>
-    /// La direccion hacia la que se moverá el comando
-    /// el cual es hacia arriba.
-    /// </summary>
-    private const Direccion _direc = Direccion.arriba;
-
-    /// <summary>
     /// Ejecuta el comando respectivo en el jugador que
     /// se entrega por parámetro.
     /// </summary>
@@ -21,6 +15,9 @@ public class UpCommand : MovementCommand
     /// que tiene el personaje del jugador</param>
     public override void Execute(Character character)
     {
-        character.MoverseHacia(_direc);
+        // La direccion hacia la que se moverá el comando
+        // el cual es hacia arriba.
+        Direccion direc = Direccion.arriba;
+        character.MoverseHacia(direc);
     }
 }

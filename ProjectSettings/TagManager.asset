@@ -6,6 +6,7 @@ TagManager:
   tags:
   - goal
   - panel
+  - texto
   layers:
   - Default
   - TransparentFX
