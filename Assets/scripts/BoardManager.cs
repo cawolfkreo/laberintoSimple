@@ -53,6 +53,15 @@ public class BoardManager : MonoBehaviour
     public GameObject Jugador;
 
     /// <summary>
+    /// retorna el componente character del objeto jugador
+    /// que se encuentra en el tablero.
+    /// </summary>
+    public Character Character
+    {
+        get => _character;
+    }
+
+    /// <summary>
     /// La cantidad de filas que tiene el tablero.
     /// </summary>
     private const int _NumFilas = 3;
@@ -77,7 +86,13 @@ public class BoardManager : MonoBehaviour
     /// Vector 2d utilizado para representar la posición
     /// del jugador en el tablero.
     /// </summary>
-    private Vector2Int posJugador;
+    private Vector2Int _posJugador;
+
+    /// <summary>
+    /// El script que se encarga de manejar
+    /// al jugador y su movimiento.
+    /// </summary>
+    private Character _character;
 
     /// <summary>
     /// Cuando el componente despierta, toma las
@@ -87,7 +102,7 @@ public class BoardManager : MonoBehaviour
     {
         _PosTablero = GetComponent<Transform>();
 
-        posJugador = new Vector2Int();
+        _posJugador = new Vector2Int();
 
         // Se crea el tablero con los prefabs escogidos.
         // Esto es hecho para temas de demostración pero
@@ -160,11 +175,16 @@ public class BoardManager : MonoBehaviour
                     // del eje Z.
                     NuevaInstancia.transform.localPosition -= new Vector3(0, 0, 1f);
 
-                    // al momento de agregar al jugador en el 
-                    if(objetoAInstanciar == Jugador)
+                    // al momento de agregar al jugador en el tablero, se almacena su
+                    // posición en el tablero y se le entrega la referencia a este
+                    // componente del tablero.
+                    if (objetoAInstanciar == Jugador)
                     {
-                        posJugador.x = x;
-                        posJugador.y = y;
+                        _posJugador.x = x;
+                        _posJugador.y = y;
+
+                        _character = NuevaInstancia.GetComponent<Character>();
+                        _character.BoardManager = this;
                     }
                 }
             }

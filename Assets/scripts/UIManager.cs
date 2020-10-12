@@ -4,33 +4,47 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
+/// Enum creado para manejar las diferentes direcciones que
+/// los elementos de la UI y los personajes pueden tener.
+/// </summary>
+public enum Direccion
+{
+    arriba,
+    derecha,
+    abajo,
+    izquierda
+}
+
+/// <summary>
 /// Este script se encarga de manejar la interfaz y sus componentes.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
-    /// <summary>
-    /// Enum creado para manejar la direccion de
-    /// las flechas al momento en que se crean en
-    /// la interfaz.
-    /// </summary>
-    public enum Direccion
-    {
-        arriba,
-        derecha,
-        abajo,
-        izquierda
-    }
-
     /// <summary>
     /// El estado actual de la interfaz. True si está activada,
     /// False en caso contrario.
     /// </summary>
     public bool IsUIActive
     {
-        get => Panel.activeSelf;
+        get => _Panel.activeSelf;
         set
         {
-            Panel.SetActive(value);
+            _Panel.SetActive(value);
+        }
+    }
+
+    /// <summary>
+    /// El nivel de transparencia actual de la imagen.
+    /// </summary>
+    public float AlphaActual
+    {
+        get => _ImgCubreEscenario.color.a;
+        set
+        {
+            if (_ImgCubreEscenario != null)
+            {
+                SetAlphaImagen(value);
+            }
         }
     }
 
@@ -42,38 +56,23 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// Esta es la imagen que se utilizará para cubrir al escenario en el juego.
     /// </summary>
-    private Image ImgCubreEscenario;
+    private Image _ImgCubreEscenario;
 
     /// <summary>
     /// El panel donde la interfaz para entregar los comandos va a ocurrir.
     /// </summary>
-    private GameObject Panel;
+    private GameObject _Panel;
 
     /// <summary>
     /// El objeto encargado de almacenar las flechas que se irán mostrando en la
     /// interfáz de usuario.
     /// </summary>
-    private List<GameObject> Flechas;
+    private List<GameObject> _Flechas;
 
     /// <summary>
     /// El recurso que contiene la imagen de la flecha
     /// </summary>
-    private Texture2D ImgFlecha;
-
-    /// <summary>
-    /// El nivel de transparencia actual de la imagen.
-    /// </summary>
-    public float AlphaActual
-    {
-        get => ImgCubreEscenario.color.a;
-        set
-        {
-            if (ImgCubreEscenario != null)
-            {
-                SetAlphaImagen(value);
-            }
-        }
-    }    
+    private Texture2D _ImgFlecha;    
 
     /// <summary>
     /// Se obtienen las referencias de la interfáz cuando este componente inicia.
@@ -81,16 +80,16 @@ public class UIManager : MonoBehaviour
     void Awake()
     {
         Canvas canvas = GetComponentInChildren<Canvas>();
-        ImgCubreEscenario = canvas.GetComponentInChildren<Image>();
-        AlphaOriginal = ImgCubreEscenario.color.a;
+        _ImgCubreEscenario = canvas.GetComponentInChildren<Image>();
+        AlphaOriginal = _ImgCubreEscenario.color.a;
 
-        Panel = GameObject.FindWithTag("panel");
+        _Panel = GameObject.FindWithTag("panel");
 
-        Flechas = new List<GameObject>();
+        _Flechas = new List<GameObject>();
 
         // Se carga el recurso de la flecha para evitar cargarlo constantemente
         // más adelante.
-        ImgFlecha = Resources.Load<Texture2D>("Images/flecha-izq");
+        _ImgFlecha = Resources.Load<Texture2D>("Images/flecha-izq");
     }
 
     /// <summary>
@@ -99,26 +98,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     void Start()
     {
-        Panel.SetActive(false);
-
-        // Prueba de que agregar flechas de forma programática funciona
-        // Esto se va a remover.
-        AgregarFlechaUI(Direccion.izquierda);
-        AgregarFlechaUI(Direccion.abajo);
-        AgregarFlechaUI(Direccion.derecha);
-        AgregarFlechaUI(Direccion.arriba);
-        AgregarFlechaUI(Direccion.izquierda);
-        AgregarFlechaUI(Direccion.abajo);
-        AgregarFlechaUI(Direccion.derecha);
-        AgregarFlechaUI(Direccion.arriba);
-        AgregarFlechaUI(Direccion.izquierda);
-        AgregarFlechaUI(Direccion.abajo);
-        AgregarFlechaUI(Direccion.derecha);
-        AgregarFlechaUI(Direccion.arriba);
-        AgregarFlechaUI(Direccion.izquierda);
-        AgregarFlechaUI(Direccion.abajo);
-        AgregarFlechaUI(Direccion.derecha);
-        AgregarFlechaUI(Direccion.arriba);
+        _Panel.SetActive(false);
     }
 
     /// <summary>
@@ -128,9 +108,9 @@ public class UIManager : MonoBehaviour
     /// <param name="nuevoAlpha">el valor </param>
     private void SetAlphaImagen(float nuevoAlpha)
     {
-        Color colorImg = ImgCubreEscenario.color;
+        Color colorImg = _ImgCubreEscenario.color;
         colorImg.a = nuevoAlpha;
-        ImgCubreEscenario.color = colorImg;
+        _ImgCubreEscenario.color = colorImg;
     }
 
     /// <summary>
@@ -176,11 +156,11 @@ public class UIManager : MonoBehaviour
     private void CrearFlecha(float rotacion)
     {
         // Se guarda el total actual de flechas para procesos posteriores
-        int totalflechas = Flechas.Count;
+        int totalflechas = _Flechas.Count;
 
         // Se crea la flecha a partir de un objeto vacio
         GameObject vacio = new GameObject("Flecha" + totalflechas);
-        GameObject Flecha = Instantiate(vacio, Panel.transform);
+        GameObject Flecha = Instantiate(vacio, _Panel.transform);
 
         // Se agrega al objeto vacio la imagen de la flecha
         RectTransform transfor = Flecha.AddComponent<RectTransform>();
@@ -191,9 +171,9 @@ public class UIManager : MonoBehaviour
         // se calcula el "padding" que cada flecha va a tener en base a la columna y fila en
         // la que le corresponde estar.
         int columna = totalflechas % 7;
-        int paddingX = columna * ImgFlecha.width * 5;
+        int paddingX = columna * _ImgFlecha.width * 5;
         int fila = totalflechas / 7;
-        int paddingY = fila * ImgFlecha.height * 5;
+        int paddingY = fila * _ImgFlecha.height * 5;
 
         // Se ajusta la posicion y rotación donde irá la imagen.
         transfor.anchoredPosition = new Vector2(-300f + paddingX, 150f - paddingY);
@@ -201,9 +181,9 @@ public class UIManager : MonoBehaviour
 
         // Se carga el recurso 
         Image img = Flecha.AddComponent<Image>();
-        img.sprite = Sprite.Create(ImgFlecha, new Rect(0, 0, ImgFlecha.width, ImgFlecha.height), new Vector2(0.5f, 0.5f));
+        img.sprite = Sprite.Create(_ImgFlecha, new Rect(0, 0, _ImgFlecha.width, _ImgFlecha.height), new Vector2(0.5f, 0.5f));
 
         // Se agrega el objeto a la lista de flechas.
-        Flechas.Add(Flecha);
+        _Flechas.Add(Flecha);
     }
 }

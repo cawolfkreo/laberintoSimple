@@ -45,18 +45,33 @@ public class LevelManager : Singleton<LevelManager>
     /// <summary>
     /// Momento en el cual el tablero debe empezar a desaparecer.
     /// </summary>
-    private float tiempoInicial;
+    private float _tiempoInicial;
 
     /// <summary>
     /// Momento en el cual el tablero debe desaparecer.
     /// </summary>
-    private float tiempoFinal;
+    private float _tiempoFinal;
 
     /// <summary>
     /// La velocidad a la que se aplicará
     /// la opacidad que cubre al tablero.
     /// </summary>
-    private float veloOpacidad;
+    private float _veloOpacidad;
+
+    /// <summary>
+    /// Bandera para indicar si se aceptan
+    /// o no comandos por el usuario en el
+    /// juego. True si se aceptan, False
+    /// en caso contrario.
+    /// </summary>
+    private bool _AceptarComandos = false;
+
+    /// <summary>
+    /// Bandera para indicar si el juego esta
+    /// reproduciendo o no los comandos del
+    /// jugador en el tablero.
+    /// </summary>
+    private bool _EstaReproduciendo = false;
 
     /// <summary>
     /// Cuando este componente despierta se obtienen las referencias o valores necesarios
@@ -73,9 +88,9 @@ public class LevelManager : Singleton<LevelManager>
     void Start()
     {
         UIManag.AlphaActual = 0f;
-        tiempoInicial = Time.time + TiempoInicTransi;
-        tiempoFinal = Time.time + TiempoMostrarTablero;
-        veloOpacidad = (tiempoFinal - tiempoInicial) * 0.016f;
+        _tiempoInicial = Time.time + TiempoInicTransi;
+        _tiempoFinal = Time.time + TiempoMostrarTablero;
+        _veloOpacidad = (_tiempoFinal - _tiempoInicial) * 0.016f;
     }
 
     /// <summary>
@@ -86,6 +101,11 @@ public class LevelManager : Singleton<LevelManager>
     void Update()
     {
         OrdenTransicionesUI();
+
+        if (_AceptarComandos)
+        {
+            CapturarComando();
+        }
     }
 
     /// <summary>
@@ -95,7 +115,7 @@ public class LevelManager : Singleton<LevelManager>
     private void OrdenTransicionesUI()
     {
         // Entre el inicio y final de la transición, se ajusta la transparencia de la imagen
-        if (Time.time < tiempoFinal && Time.time >= tiempoInicial)
+        if (Time.time < _tiempoFinal && Time.time >= _tiempoInicial)
         {
             float transpareActual = UIManag.AlphaActual;
 
@@ -103,18 +123,77 @@ public class LevelManager : Singleton<LevelManager>
 
             if (diferenciaTransp > 0.00001f)
             {
-                transpareActual = Mathf.Lerp(transpareActual, _AlphaObjetivo, veloOpacidad);
+                transpareActual = Mathf.Lerp(transpareActual, _AlphaObjetivo, _veloOpacidad);
                 UIManag.AlphaActual = transpareActual;
             }
         }
         // Cuando se oculta el tablero, se activa la interfaz y se ajusta la transparencia final de la imagen
-        else if(Time.time > tiempoFinal)
+        else if(Time.time > _tiempoFinal && !_EstaReproduciendo)
         {
             UIManag.AlphaActual = _AlphaObjetivo;
             if(!UIManag.IsUIActive)
             {
                 UIManag.IsUIActive = true;
+
+                _AceptarComandos = true;
             }
+        }
+        else if (_EstaReproduciendo)
+        {
+            UIManag.AlphaActual = 0f;
+            Tablero.Character.RealizarComandos();
+        }
+    }
+
+    /// <summary>
+    /// revisa si el usuario está presionando alguna
+    /// de las flechas de movimiento en el teclado,
+    /// crea el comando correspondiente y lo envia
+    /// a el personaje del jugador.
+    /// </summary>
+    private void CapturarComando()
+    {
+        // Se crea una referencia nula al commando a ejecutar
+        MovementCommand newCommand = null;
+
+        // Se crea una referencia a la direccion
+        // que tendra el comando a crear para
+        // enviarlo a la interfaz.
+        Direccion direccion = Direccion.derecha;
+
+        // Si el jugador presiona alguna tecla,
+        // entonces se crea el comando a ejecutar
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            newCommand = new UpCommand();
+            direccion = Direccion.arriba;
+        }
+        else if(Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            newCommand = new DownCommand();
+            direccion = Direccion.abajo;
+        }
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            newCommand = new LeftCommand();
+            direccion = Direccion.izquierda;
+        }
+        else if(Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            newCommand = new RightCommand();
+            // no es necesario modificar el valor de la variable "dirección".
+        }
+
+        // Si alguno de las flechas en el teclado
+        // fue presionada, entonces se le envia
+        // el comando al personaje del jugador.
+        if(newCommand != null)
+        {
+            Tablero.Character.RegistrarComandos(newCommand);
+
+            // Solo se agrega la flecha en la dirección del movimiento
+            // del jugador cuando se recibe un comando de este.
+            UIManag.AgregarFlechaUI(direccion);
         }
     }
 
@@ -124,6 +203,22 @@ public class LevelManager : Singleton<LevelManager>
     /// </summary>
     public void MostrarTablero()
     {
+        // Se marca que ya no se aceptan comandos.
+        _AceptarComandos = false;
 
+        // Se marca que el juego ya está 
+        // reproduciendo los comandos
+        _EstaReproduciendo = true;
+
+        // Se procede a calcular los tiempos
+        // en donde se volverá a mostrar el tablero
+        _tiempoInicial = Time.time;
+        _tiempoFinal = _tiempoInicial + (TiempoMostrarTablero - TiempoInicTransi);
+
+        // Se cambia el nivel de transparencia objetivo a 0
+        _AlphaObjetivo = 0f;
+
+        // Se oculta la interfaz
+        UIManag.IsUIActive = false;
     }
 }
