@@ -11,4 +11,12 @@ public abstract class MovementCommand
     /// <param name="character">El personaje en el cual se debe 
     /// ejecutar el commando.</param>
     public abstract void Execute(Character character);
+
+    /// <summary>
+    /// Deshace el comando realizado en el personaje que se
+    /// pasa por parámetro.
+    /// </summary>
+    /// <param name="character">El personaje en el cual se debe
+    /// deshacer el comando.</param>
+    public abstract void Undo(Character character);
 }

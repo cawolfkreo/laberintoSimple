@@ -20,4 +20,19 @@ public class DownCommand : MovementCommand
         Direccion direc = Direccion.abajo;
         character.MoverseHacia(direc);
     }
+
+    /// <summary>
+    /// Deshace el comando respectivo en el jugador
+    /// que se entrega por parámetro.
+    /// </summary>
+    /// <param name="character">El componente character
+    /// que tiene el personaje del jugador</param>
+    public override void Undo(Character character)
+    {
+        // La direccion hacia la que se moverá el personaje
+        // para deshacer el comando, en este caso es la
+        // dirección arriba.
+        Direccion direc = Direccion.arriba;
+        character.MoverseHacia(direc);
+    }
 }

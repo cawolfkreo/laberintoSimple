@@ -33,6 +33,12 @@ public class Character : MonoBehaviour
     private bool _FinalizoElJuego;
 
     /// <summary>
+    /// Bandera que almacena si el jugador debe revertir
+    /// el último comando o no.
+    /// </summary>
+    private bool _DebeRevertir = false;
+
+    /// <summary>
     /// Cuando el personaje se despierta obtiene las referencias
     /// necesarias para su funcionamiento.
     /// </summary>
@@ -85,11 +91,15 @@ public class Character : MonoBehaviour
             LevelManager.Instance.TriggerLose();
         }
 
-        bool haGanado = BoardManag.JugadorenMeta();
+        bool haGanado = BoardManag.JugadorEnMeta();
         if (haGanado)
         {
             LevelManager.Instance.TriggerWin();
         }
+
+        // Se revisa si el jugador se encuentra sobre una
+        // casilla donde debe revertir el último comando.
+        _DebeRevertir = BoardManag.JugadorEnRevertir();
     }
 
     /// <summary>
@@ -117,14 +127,46 @@ public class Character : MonoBehaviour
 
         if (!_FinalizoElJuego &&_TiempoProximoCom <= tiempoAct && _ComandosAEjecutar.Count > 0)
         {
-            MovementCommand comandoAEjecutar = _ComandosAEjecutar.Peek();
+            MovementCommand comandoAEjecutar = _ComandosAEjecutar.Peek();            
 
-            comandoAEjecutar.Execute(this);
+            if (_DebeRevertir)
+            {
+                // Se deshace el último comando y además
+                // Se remueve el objeto que deshace los
+                // comandos del jugador.
+                BoardManag.RemoverObjDeshacer();
+                comandoAEjecutar.Undo(this);
+                _DebeRevertir = false;
 
-            // Se remueve el comando solo cuando este ya fue ejecutado
-            _ = _ComandosAEjecutar.Dequeue();
+                // Una vez revertido el comando, se remueve
+                // de la lista.
+                _ = _ComandosAEjecutar.Dequeue();
+            }
+            else
+            {
+                comandoAEjecutar.Execute(this);
 
-            _TiempoProximoCom = tiempoAct + TiempoEntreMovimientos;
+                // Si al ejecutar el comando, se activo la bandera, el comando no debe
+                // removerse de la cola de comandos.
+                if (!_DebeRevertir)
+                {
+                    // Se remueve el comando solo cuando este ya fue ejecutado
+                    _ = _ComandosAEjecutar.Dequeue();
+
+                }
+            }
+
+            // Si se ejecuto el comando y se levanto la bandera que debe revertir
+            // Es necesario ajustar los tiempos para mostrar al jugador que su
+            // comando se deshizo y que la luna ya no está en el tablero.
+            if (_DebeRevertir)
+            {
+                _TiempoProximoCom = tiempoAct + (TiempoEntreMovimientos / 2);
+            }
+            else
+            {
+                _TiempoProximoCom = tiempoAct + TiempoEntreMovimientos;
+            }
         }
     }
 

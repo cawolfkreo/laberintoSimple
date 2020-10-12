@@ -300,7 +300,7 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     /// <returns>True si el jugador esta sobre la meta, false
     /// en caso contrario</returns>
-    public bool JugadorenMeta()
+    public bool JugadorEnMeta()
     {
         return EsClonDelPrefab(_CasillaBajoJugador, Meta);
     }
@@ -315,5 +315,31 @@ public class BoardManager : MonoBehaviour
     public bool JugadorChocoPared()
     {
         return EsClonDelPrefab(_CasillaBajoJugador, Pared);
+    }
+
+    /// <summary>
+    /// Revisa si el jugador se encuentra o nossobre una 
+    /// casilla con revertir
+    /// </summary>
+    /// <returns>True si el jugador está sobre una casilla
+    /// con revertir. False en caso contrario.</returns>
+    public bool JugadorEnRevertir()
+    {
+        return EsClonDelPrefab(_CasillaBajoJugador, Revertir);
+    }
+
+    /// <summary>
+    /// Si el jugador está sobre una casilla que tiene el
+    /// objeto que deshace la última acción, se destruye dicho
+    /// objeto del juego y se actualiza la casilla en la que
+    /// está el jugador
+    /// </summary>
+    public void RemoverObjDeshacer()
+    {
+        if(EsClonDelPrefab(_CasillaBajoJugador, Revertir))
+        {
+            Destroy(_CasillaBajoJugador);
+            _CasillaBajoJugador = null;
+        }
     }
 }

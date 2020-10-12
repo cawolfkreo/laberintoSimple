@@ -562,7 +562,8 @@ MonoBehaviour:
   Suelo: {fileID: 1501953814540545778, guid: 58558b5113bd7624ea65f0821748c4a8, type: 3}
   Pared: {fileID: 2908827240039046056, guid: f540a22003a27c546a3d429c49d01487, type: 3}
   Meta: {fileID: 6687147906226451842, guid: a618a03254cf3f9499f93f148a08b44f, type: 3}
-  remover: {fileID: 8078791239065543991, guid: 5fce456273253b9489ea096585fee700, type: 3}
+  Revertir: {fileID: 8078791239065543991, guid: 5fce456273253b9489ea096585fee700,
+    type: 3}
   Jugador: {fileID: 7413408534430425469, guid: 8f4a503d8684f7446aace28c3442aa5b, type: 3}
 --- !u!4 &997502898
 Transform:
